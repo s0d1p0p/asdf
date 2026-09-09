@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Salesforce Bouncing Screensaver</title>
+<style>
+html,body{margin:0;width:100%;height:100%;background:#000;overflow:hidden;font-family:Arial,Helvetica,sans-serif}
+#stage{position:fixed;inset:0;background:#000;cursor:none}
+#logo{position:absolute;width:230px;height:135px;user-select:none;will-change:transform;--cloud-color:#00A1E0}
+.bubble{position:absolute;background:var(--cloud-color);border-radius:999px}
+.b1{width:110px;height:95px;left:56px;top:22px}
+.b2{width:92px;height:86px;left:15px;top:39px}
+.b3{width:90px;height:80px;left:125px;top:43px}
+.b4{width:78px;height:72px;left:75px;top:5px}
+.base{width:176px;height:70px;left:28px;top:61px}
+.wordmark{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;padding-top:11px;color:#fff;font-size:30px;font-weight:500;letter-spacing:-1.4px;z-index:5}
+#controls{position:fixed;top:18px;right:18px;display:flex;gap:8px;opacity:0;transition:opacity .2s;z-index:20}
+body:hover #controls{opacity:1}
+button{border:1px solid rgba(255,255,255,.18);background:rgba(255,255,255,.08);color:#fff;padding:8px 12px;border-radius:10px;font-size:13px;cursor:pointer}
+</style>
+</head>
+<body>
+<div id="stage">
+  <div id="logo">
+    <div class="bubble b1"></div><div class="bubble b2"></div><div class="bubble b3"></div><div class="bubble b4"></div><div class="bubble base"></div>
+    <div class="wordmark">salesforce</div>
+  </div>
+</div>
+<div id="controls"><button id="speedBtn">Speed: 1×</button><button id="fullscreenBtn">Fullscreen</button></div>
+<script>
+const logo=document.getElementById('logo'),stage=document.getElementById('stage');
+const colors=['#00A1E0','#7F3FFF','#FF5A5F','#FFB000','#00BFA5','#FF3B8D','#43A047','#F4511E'];
+let x=60,y=60,vx=145,vy=112,last=performance.now(),ci=0,m=1;
+function color(){ci=(ci+1)%colors.length;logo.style.setProperty('--cloud-color',colors[ci])}
+function loop(now){
+  const dt=Math.min((now-last)/1000,.033);last=now;
+  const maxX=stage.clientWidth-logo.offsetWidth,maxY=stage.clientHeight-logo.offsetHeight;
+  x+=vx*dt*m;y+=vy*dt*m;let b=false;
+  if(x<=0){x=0;vx=Math.abs(vx);b=true}else if(x>=maxX){x=maxX;vx=-Math.abs(vx);b=true}
+  if(y<=0){y=0;vy=Math.abs(vy);b=true}else if(y>=maxY){y=maxY;vy=-Math.abs(vy);b=true}
+  if(b)color();logo.style.transform=`translate3d(${x}px,${y}px,0)`;requestAnimationFrame(loop)
+}
+requestAnimationFrame(loop);
+function fs(){if(!document.fullscreenElement)document.documentElement.requestFullscreen?.()}
+document.getElementById('fullscreenBtn').onclick=e=>{e.stopPropagation();fs()};
+stage.onclick=fs;
+const speeds=[.6,1,1.5,2];let si=1;
+document.getElementById('speedBtn').onclick=e=>{e.stopPropagation();si=(si+1)%speeds.length;m=speeds[si];e.target.textContent=`Speed: ${m}×`}
+</script>
+</body>
+</html>
