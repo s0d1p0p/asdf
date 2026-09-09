@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Salesforce DVD Bounce</title>
+  <style>
+    :root { color-scheme: dark; }
+    * { box-sizing: border-box; }
+    body { margin: 0; overflow: hidden; background: #070b14; font-family: Arial, Helvetica, sans-serif; }
+    #stage { position: fixed; inset: 0; background: radial-gradient(circle at 50% 45%, #14233d 0%, #070b14 55%, #03050a 100%); }
+    #cloud { position: absolute; width: 190px; height: 118px; filter: drop-shadow(0 12px 10px rgba(0,0,0,.35)); user-select: none; }
+    #cloud::before, #cloud::after { content: ""; position: absolute; background: var(--logo-colour, #00a1e0); }
+    #cloud::before { width: 142px; height: 92px; border-radius: 55px; left: 24px; top: 23px; }
+    #cloud::after { width: 78px; height: 78px; border-radius: 50%; left: 5px; top: 43px; box-shadow: 55px -39px 0 14px var(--logo-colour, #00a1e0), 101px 1px 0 6px var(--logo-colour, #00a1e0); }
+    #wordmark { position: absolute; inset: 0; display: grid; place-items: center; color: #fff; font-weight: 700; font-size: 24px; letter-spacing: -1.2px; padding: 17px 8px 0; z-index: 1; text-shadow: 0 1px 1px rgba(0,0,0,.08); }
+    #hint { position: fixed; bottom: 18px; left: 50%; transform: translateX(-50%); color: #9fb0c9; font-size: 13px; opacity: .8; transition: opacity .25s; }
+    #hint.hidden { opacity: 0; }
+    button { position: fixed; top: 16px; right: 16px; border: 1px solid #314661; background: rgba(11,20,35,.75); color: #dce8f7; border-radius: 8px; padding: 8px 12px; cursor: pointer; font: inherit; font-size: 13px; backdrop-filter: blur(6px); }
+    button:hover { background: #1b304b; }
+  </style>
+</head>
+<body>
+  <main id="stage" aria-label="A Salesforce logo bouncing around the screen"></main>
+  <div id="cloud" role="img" aria-label="Salesforce"><span id="wordmark">salesforce</span></div>
+  <button id="toggle" type="button">Pause</button>
+  <div id="hint">Press space to pause · Every wall hit changes the colour</div>
+  <script>
+    const cloud = document.querySelector('#cloud');
+    const toggle = document.querySelector('#toggle');
+    const hint = document.querySelector('#hint');
+    const colours = ['#00a1e0', '#ff5d22', '#7b61ff', '#2e844a', '#e64b91', '#d94040', '#f2ad00'];
+    let x = innerWidth * .32, y = innerHeight * .28, vx = 3.2, vy = 2.25, paused = false, colour = 0;
+
+    function dimensions() { return { w: cloud.offsetWidth, h: cloud.offsetHeight }; }
+    function setColour() { cloud.style.setProperty('--logo-colour', colours[++colour % colours.length]); }
+    function frame() {
+      if (!paused) {
+        const { w, h } = dimensions();
+        x += vx; y += vy;
+        let hit = false;
+        if (x <= 0 || x + w >= innerWidth) { vx *= -1; x = Math.max(0, Math.min(x, innerWidth - w)); hit = true; }
+        if (y <= 0 || y + h >= innerHeight) { vy *= -1; y = Math.max(0, Math.min(y, innerHeight - h)); hit = true; }
+        if (hit) setColour();
+        cloud.style.transform = `translate(${x}px, ${y}px)`;
+      }
+      requestAnimationFrame(frame);
+    }
+    function togglePause() { paused = !paused; toggle.textContent = paused ? 'Play' : 'Pause'; hint.classList.add('hidden'); }
+    toggle.addEventListener('click', togglePause);
+    addEventListener('keydown', event => { if (event.code === 'Space') { event.preventDefault(); togglePause(); } });
+    addEventListener('resize', () => { const { w, h } = dimensions(); x = Math.min(x, innerWidth - w); y = Math.min(y, innerHeight - h); });
+    requestAnimationFrame(frame);
+  </script>
+</body>
+</html>
